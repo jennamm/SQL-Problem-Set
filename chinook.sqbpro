@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/Users/Admin/Documents/MSSP/MA_615/SQL Problem Set/chinook.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="125"/><column_width id="3" width="4436"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,6:mainalbums"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="albums" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="84"/><column index="2" value="300"/><column index="3" value="76"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">-- 1
+SELECT FirstName, LastName
+FROM Customers
+where Country = &quot;Brazil&quot;;
+
+-- 2
+SELECT c.FirstName, c.LastName, i.InvoiceId, i.InvoiceDate, i.BillingCountry
+FROM customers as c, invoices as i
+where c.Country = &quot;Brazil&quot; AND
+c.CustomerId = i.CustomerId;
+
+-- 3
+SELECT BillingCountry, COUNT(InvoiceId)
+FROM invoices
+GROUP BY BillingCountry;
+
+-- 4
+SELECT i.InvoiceId, COUNT(i1.InvoiceLineId) as &quot;Number of invoice lines &quot;
+FROM Invoices i
+JOIN Invoice_items i1
+ON i.InvoiceId = i1.InvoiceId
+GROUP BY i.InvoiceId;
+
+-- 5
+SELECT InvoiceLineId, t.name
+FROM Invoice_items i
+JOIN Tracks t
+ON t.TrackId = i.TrackId
+ORDER BY t.TrackId;
+
+-- 6
+SELECT COUNT(InvoiceLineId) as &quot;Number of Line Items&quot;
+FROM invoice_items
+WHERE InvoiceId = 37;
+
+-- 7
+SELECT e.FirstName, e.LastName, i.InvoiceId, i.CustomerId, i.InvoiceDate, i.BillingAddress, i.BillingCountry, i.BillingPostalCode, i.total
+FROM customers as c, invoices as i
+on c.CustomerId = i.CustomerId
+join employees as e
+on e.EmployeeId = c. SupportRepId
+ORDER BY e.EmployeeId;
+
+-- 8
+SELECT InvoiceLineId, t.name as &quot;Song&quot;, ar.Name as &quot;Artist&quot;
+FROM Invoice_items i
+JOIN Tracks t
+ON t.TrackId = i.TrackId
+JOIN Albums a
+ON a.AlbumId = t.AlbumId
+JOIN Artists ar
+ON ar.ArtistId = a.ArtistId
+ORDER BY t.TrackId;
+ 
+-- 9
+SELECT InvoiceId, COUNT(InvoiceLIneId) as &quot;Invoice Count&quot;
+FROM invoice_items
+GROUP BY InvoiceId;
+
+-- 10
+SELECT FirstName, LastName, CustomerId, Country
+FROM customers
+WHERE not Country = &quot;USA&quot;;
+
+-- 11
+SELECT p.Name, COUNT(pt.TrackId) as &quot;Number Of Tracks&quot;
+FROM Playlists p
+JOIN Playlist_Track pt
+ON p.PlaylistId = pt.PlaylistId
+GROUP BY p.name;
+
+-- 12
+SELECT e.*, count(c.CustomerId) as 'TotalCustomers'
+FROM employees as e
+	JOIN customers as c on e.EmployeeId = c.SupportRepId
+GROUP BY e.EmployeeId;
+
+-- 13
+SELECT e.FirstName, e.LastName, i.InvoiceId, i.CustomerId, i.InvoiceDate, i.BillingAddress, i.BillingCountry, i.BillingPostalCode, i.total
+FROM customers as c, invoices as i
+ON c.CustomerId = i.CustomerId
+JOIN employees as e
+ON e.EmployeeId = c.SupportRepId
+ORDER BY e.EmployeeId;
+
+-- 14
+SELECT e.*, count(i.InvoiceId) as 'Total Number of Sales'
+FROM employees as e
+	JOIN customers as c ON e.EmployeeId = c.SupportRepId
+	JOIN invoices as i ON i.CustomerId = c.CustomerId
+GROUP BY e.EmployeeId;
+
+-- 15
+SELECT * from employees
+WHERE employees.Title = &quot;Sales Support Agent&quot;;
+
+-- 16
+SELECT BillingCountry , SUM(Total) as &quot;Total Sales For Country&quot;
+FROM Invoices
+GROUP BY BillingCountry; 
+
+-- 17
+select a.Name, round(sum(il.UnitPrice), 2) TotalSales
+from artists a, invoice_items il, tracks t, albums al
+where il.TrackId = t.TrackId
+and t.AlbumId = al.AlbumId
+and al.ArtistId = a.ArtistId
+group by a.Name
+order by TotalSales desc
+limit 3;
+
+-- 18
+select t.Name, count(t.Name) PurchaseCount
+from tracks t
+join invoice_items il on il.TrackId = t.TrackId
+group by t.Name
+order by PurchaseCount desc
+limit 5;
+
+-- 19
+SELECT *, max(total) from
+(SELECT e.*, sum(total) as 'Total'
+FROM employees as e
+	JOIN customers as c on e.employeeid = c.supportrepid
+	JOIN invoices as i on i.customerid = c.customerid
+WHERE i.invoicedate between '2009-01-00' and '2009-12-31'
+GROUP BY e.employeeid);
+
+-- 20 I'm not sure what this question is asking.
+
+-- 21
+select  t.Name, count(il.TrackId) PurchaseCount, i.InvoiceDate
+from invoices i, invoice_items il
+join tracks t on t.TrackId = il.TrackId
+where il.InvoiceId = i.InvoiceId
+and strftime('%Y', i.InvoiceDate) = &quot;2013&quot;
+group by t.Name
+order by PurchaseCount desc;
+
+-- 22
+SELECT *, max(total) FROM
+(SELECT e.*, sum(total) as 'Total'
+FROM employees as e
+	JOIN customers as c ON e.EmployeeId = c.SupportRepId
+	JOIN invoices as i ON i.CustomerId = c.CustomerId
+GROUP BY e.EmployeeId);
+
+-- 23
+select '$' || max(CountrySales.TotalSales) Sales, CountrySales.Country
+from
+	(select i.BillingCountry Country, sum(i.Total) TotalSales
+	from invoices i
+	group by i.BillingCountry) CountrySales, invoices i;
+
+-- 24
+select Purchases.Name, max(Purchases.PurchaseCount) Purchases
+from
+	(select m.Name, count(il.TrackId) PurchaseCount
+	from media_types m, invoice_items il, tracks t
+	where il.TrackId = t.TrackId
+	and t.MediaTypeId = m.MediaTypeId
+	group by m.Name) Purchases;
+
+-- 25
+select count(i.InvoiceId) NumberOfInvoices, strftime('%Y', i.InvoiceDate) as InvoiceYear
+from invoices i
+where InvoiceYear = '2011'
+or InvoiceYear = '2009'
+group by InvoiceYear;
+
+-- 26 I am not sure how this question is different from number 27.
+
+-- 27
+-- For 2009
+SELECT sum(Total) as &quot;Total Sales&quot;
+FROM invoices
+WHERE InvoiceDate between &quot;2009-01-01&quot; AND &quot;2010-01-01&quot;;
+-- For 2010
+SELECT sum(Total) as &quot;Total Sales&quot;
+FROM invoices
+WHERE InvoiceDate between &quot;2010-01-01&quot; AND &quot;2011-01-01&quot;;
+-- For 2011
+SELECT sum(Total)as &quot;Total Sales&quot;
+FROM invoices
+WHERE InvoiceDate between &quot;2011-01-01&quot; AND &quot;2012-01-01&quot;;
+
+-- 28
+select t.name as 'track', t.composer, t.milliseconds, t.bytes, t.unitprice, a.title as 'album', g.name as 'genre', m.name as 'media type'
+from tracks as t
+	join albums as a on a.albumid = t.albumid
+	join genres as g on g.genreid = t.genreid
+	join media_types as m on m.mediatypeid = t.mediatypeid
+</sql><current_tab id="0"/></tab_sql></sqlb_project>
