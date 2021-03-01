@@ -1,3 +1,3 @@
 # SQL-Problem-Set
 
-This is for the 28 questions Dr. Wright has given MA 615 for the SQL Problem Set.
+These are some of the first exercises that we used for GRSMA615 in SQL.
